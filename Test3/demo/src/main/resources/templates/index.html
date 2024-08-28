@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>User Management</h1>
+
+<!-- Form to create a new user -->
+<h2>Create User</h2>
+<form id="createUserForm">
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button type="submit">Create User</button>
+</form>
+
+<!-- Section to display all users -->
+<h2>All Users</h2>
+<table id="userTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Password</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- User rows will be inserted here -->
+    </tbody>
+</table>
+
+<script>
+    const apiUrl = 'http://localhost:9999/user'; // Update this URL if necessary
+
+    // Function to fetch and display all users
+    function fetchUsers() {
+        fetch(`${apiUrl}/getAllUsers`)
+            .then(response => response.json())
+            .then(users => {
+                const tbody = document.querySelector('#userTable tbody');
+                tbody.innerHTML = ''; // Clear existing rows
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.password}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error fetching users:', error));
+    }
+
+    // Event listener for form submission to create a new user
+    document.getElementById('createUserForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        fetch(`${apiUrl}/createUser`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        })
+        .then(response => response.json())
+        .then(user => {
+            console.log('User created:', user);
+            fetchUsers(); // Refresh user list
+            document.getElementById('createUserForm').reset(); // Reset form fields
+        })
+        .catch(error => console.error('Error creating user:', error));
+    });
+
+    // Fetch and display users when the page loads
+    fetchUsers();
+</script>
+
+</body>
+</html>
